@@ -1,0 +1,75 @@
+import type { Task, HMList, AuthUser } from '@/types';
+
+// Shared test fixtures — use these in tests rather than inline magic strings.
+
+export const FIXTURES = {
+  frob: 'test-frob-abc123',
+  token: 'test-token-def456',
+
+  user: {
+    id: '42',
+    username: 'test@example.com',
+    fullname: 'Test User',
+  } satisfies AuthUser,
+
+  tasks: [
+    {
+      id: '4ab',
+      summary: 'Buy milk',
+      description: '',
+      complete: false,
+      completed_at: null,
+      due: '2026-04-15',
+      starts: null,
+      priority: 3,
+      tags: 'errands',
+      owner: { id: '42', name: 'Test User', email: 'test@example.com' },
+      requestor: null,
+      group_id: null,
+      depends_on_count: 0,
+      depends_on_ids: '',
+      depends_on_summaries: '',
+      depended_on_by_count: 0,
+      repeat_period: null,
+      repeat_every: null,
+      time_estimate: null,
+      time_worked: null,
+      time_left: null,
+      attachment_count: 0,
+      last_modified: '2026-04-10T12:00:00Z',
+      created: '2026-04-10T10:00:00Z',
+    },
+    {
+      id: '5cd',
+      summary: 'Write report',
+      description: 'Q1 summary for management',
+      complete: false,
+      completed_at: null,
+      due: null,
+      starts: null,
+      priority: 5,
+      tags: 'work',
+      owner: { id: '42', name: 'Test User', email: 'test@example.com' },
+      requestor: null,
+      group_id: null,
+      depends_on_count: 0,
+      depends_on_ids: '',
+      depends_on_summaries: '',
+      depended_on_by_count: 0,
+      repeat_period: null,
+      repeat_every: null,
+      time_estimate: null,
+      time_worked: null,
+      time_left: null,
+      attachment_count: 0,
+      last_modified: '2026-04-11T08:00:00Z',
+      created: '2026-04-09T09:00:00Z',
+    },
+  ] satisfies Task[],
+
+  lists: [
+    { id: 1, name: 'To Do', deleted: false, locked: true, archived: false, position: 0 },
+    { id: 2, name: 'Later', deleted: false, locked: true, archived: false, position: 1 },
+    { id: 3, name: 'Unaccepted', deleted: false, locked: true, archived: false, position: 2 },
+  ] satisfies HMList[],
+};

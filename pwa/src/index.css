@@ -1,0 +1,28 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #111827;
+  background: #ffffff;
+  /* Prevent overscroll bounce on iOS in standalone PWA mode */
+  overscroll-behavior: none;
+}
+
+/* Remove default button/input styles that vary per browser */
+button, input, textarea, select {
+  font: inherit;
+}
+
+/* Minimum tap target size for mobile accessibility */
+button {
+  min-height: 44px;
+}
