@@ -80,8 +80,6 @@ my $prefs = $tools->child('Preferences' => url => "/prefs", render_children_inli
 $prefs->child('About you'        => url => '/prefs');
 $prefs->child('Security'         => url => '/prefs/security');
 $prefs->child('Tasks by Email'   => url => '/prefs/addresses');
-$prefs->child('Tasks by IM'      => url => '/prefs/IM');
-$prefs->child('Tasks by Twitter' => url => '/prefs/twitter');
 
 $tools->child('Hiveminder Store'         => url => "/account");
 

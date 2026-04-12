@@ -40,10 +40,6 @@ alias BTDT::View::Admin under 'admin/';
 require BTDT::View::Let;
 alias BTDT::View::Let under 'let/';
 
-require BTDT::View::Pingdom;
-alias BTDT::View::Pingdom under 'pingdom/';
-
-
 require BTDT::View::RequestInspector;
 alias BTDT::View::RequestInspector under 'debugging/';
 
