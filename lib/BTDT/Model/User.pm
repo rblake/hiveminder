@@ -12,6 +12,7 @@ Describes a user of the system.
 =cut
 
 package BTDT::Model::User;
+require Jifty::Plugin::Quota::Model::Quota; # LOCAL PATCH
 use Jifty::DBI::Schema;
 use DateTime;
 use DateTime::TimeZone;
@@ -459,6 +460,12 @@ sub validate_email_secret {
         if $value =~ /\W/;
 
     return 1;
+}
+
+sub pro_account {
+    my $self = shift;
+    return 1 if $ENV{HM_LOCAL_MODE}; # LOCAL PATCH
+    return $self->_value('pro_account', @_);
 }
 
 =head2 after_set_pro_account

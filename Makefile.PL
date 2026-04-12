@@ -1,7 +1,7 @@
 use inc::Module::Install;
 
 if (!can_run('hmperl')) {
-    die "You must have an 'hmperl' in your \$PATH. Maybe run: sudo ln -vis `which perl` /usr/local/bin/hmperl\n";
+    warn "You must have an 'hmperl' in your \$PATH. Maybe run: sudo ln -vis `which perl` /usr/local/bin/hmperl\n";
 }
 
 name('BTDT');

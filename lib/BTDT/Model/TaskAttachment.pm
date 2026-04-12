@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 package BTDT::Model::TaskAttachment;
+require Jifty::Plugin::Quota::Model::Quota; # LOCAL PATCH
 
 =head1 NAME
 

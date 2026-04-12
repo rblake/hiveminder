@@ -172,7 +172,7 @@ sub parse_date_manip {
     # ConvTZ sets the output timezone
     # ForceDate forces the current date to be now in the user's timezone,
     #    if we don't set it then DM uses the machine's timezone
-    Date::Manip::Date_Init("TZ=$offset", "ConvTZ=$offset", "ForceDate=$now");
+    my $tz = $offset || 'UTC'; Date::Manip::Date_Init("TZ=$tz", "ForceDate=$now"); # LOCAL PATCH: ConvTZ removed in Date::Manip 6.x
 
     my $datestr = Date::Manip::ParseDate($c) or return;
     my ($y, $m, $d) = $datestr =~ /^(\d\d\d\d)(\d\d)(\d\d)/ or return;

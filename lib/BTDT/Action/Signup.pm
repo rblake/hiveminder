@@ -114,6 +114,7 @@ sub take_action {
     $values{$_} = $self->argument_value($_)
       for grep { defined $self->record->column($_) and defined $self->argument_value($_) } $self->argument_names;
 
+    $values{email_confirmed} = 1 if $ENV{HM_LOCAL_MODE}; # LOCAL PATCH
     my ($id) = $record->create(%values);
     # Handle errors?
     unless ( $record->id ) {
