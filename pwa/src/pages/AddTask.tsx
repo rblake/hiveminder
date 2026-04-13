@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAddTask } from '@/hooks/useTasks';
 import { useVoice } from '@/hooks/useVoice';
 import { MicButton } from '@/components/MicButton';
+import { parseVoiceInput } from '@/api/voice';
 import styles from './AddTask.module.css';
 
 interface Props {
@@ -35,7 +36,7 @@ export function AddTask({ token, onSubmit, onCancel }: Props) {
 
   const handleSubmit = () => {
     if (!text.trim()) return;
-    addTask(text.trim(), {
+    addTask(parseVoiceInput(text.trim()), {
       onSuccess: () => {
         setText('');
         onSubmit();

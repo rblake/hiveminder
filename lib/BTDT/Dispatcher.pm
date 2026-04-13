@@ -15,7 +15,7 @@ our $RESTRICTED = qr{^/(?!(
                          feeds|let|errors|dhandler|static|__jifty|fragments/no_auth|favicon.ico|
                          legal|splash|help|opted_out|about|braindump|news|tour|pro|
                          (mobile|mini)/login|integration|oauth($|/request_token|/access_token)|=|
-                         pingdom|
+                         pingdom|app|
                          services/rest
                      )($|/))}x;
 
@@ -182,6 +182,10 @@ before HTTPS $RESTRICTED => run {
 # Protect elements directories
 # do not anchor this, runs on _any_ level
 before qr'/_elements/' => redirect "/errors/requested_private_component";
+
+# PWA shell — serve index.html for /app/ and any SPA route under /app/
+# Static files (JS/CSS/assets) are served directly by Jifty's static handler.
+before qr{^/app(/[^.]*)?$} => redirect '/app/index.html';
 
 #Backwards compat for the bizarre offchance anyone kept these URLs
 #around.

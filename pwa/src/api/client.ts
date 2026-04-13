@@ -4,7 +4,7 @@
 // sets it to https://tasks.rblake.net so MSW can intercept the requests.
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
 const RTM_BASE = `${API_BASE}/services/rest/`;
-const LOGIN_URL = `${API_BASE}/=/BTDT.Action.Login`;
+const LOGIN_URL = `${API_BASE}/=/action/BTDT.Action.Login`;
 
 export class RtmError extends Error {
   constructor(
@@ -26,6 +26,7 @@ export async function rtmCall(
   const url = new URL(RTM_BASE, API_BASE || window.location.origin);
   url.searchParams.set('method', method);
   url.searchParams.set('auth_token', token);
+  url.searchParams.set('format', 'json');
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, v);
   }
@@ -35,12 +36,13 @@ export async function rtmCall(
     throw new RtmError(`HTTP ${res.status}`, res.status);
   }
 
-  const json = (await res.json()) as { stat: string; code?: number; message?: string };
-  if (json.stat !== 'ok') {
-    throw new RtmError(json.message ?? 'Unknown error', json.code ?? 0);
+  const envelope = (await res.json()) as { rsp: { stat: string; code?: number; message?: string } };
+  const rsp = envelope.rsp;
+  if (rsp.stat !== 'ok') {
+    throw new RtmError(rsp.message ?? 'Unknown error', rsp.code ?? 0);
   }
 
-  return json;
+  return rsp;
 }
 
 // POST a Jifty action login. Used once during the auth bootstrap to get a session
@@ -48,19 +50,24 @@ export async function rtmCall(
 // Returns true on success, throws on failure.
 export async function jiftyLogin(email: string, password: string): Promise<void> {
   const body = new URLSearchParams({
-    'J:A:F-email-Login': email,
-    'J:A:F-password-Login': password,
+    address: email,
+    password: password,
+    remember: '1',
   });
 
   const res = await fetch(LOGIN_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
     body: body.toString(),
     credentials: 'same-origin',
   });
 
   if (!res.ok) {
     throw new RtmError(`Login failed: HTTP ${res.status}`, res.status);
+  }
+  const json = (await res.json()) as { success: number; message?: string };
+  if (!json.success) {
+    throw new RtmError(json.message ?? 'Login failed', 0);
   }
   // The session cookie is set by the browser's cookie jar automatically.
   // We don't read or store it — we use it immediately to get a permanent token.

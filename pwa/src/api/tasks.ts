@@ -1,49 +1,56 @@
-import { rtmCall } from './client';
 import type { Task } from '@/types';
 
-interface GetTasksOptions {
-  list_id?: number;
-  modified_after?: string;  // ISO8601 — fetches only tasks changed since this time
+const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
+
+// Use the Hiveminder model REST API for task CRUD.
+// This returns Task objects that match our interface directly.
+// Auth is via the session cookie set during jiftyLogin (with remember=1,
+// the cookie is persistent for 1 year).
+
+async function modelGet<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { credentials: 'same-origin' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json() as Promise<T>;
 }
 
-export async function getTasks(token: string, opts: GetTasksOptions = {}): Promise<Task[]> {
-  const params: Record<string, string> = {};
-  if (opts.list_id !== undefined) params.list_id = String(opts.list_id);
-  if (opts.modified_after) params.modified_after = opts.modified_after;
-
-  const res = await rtmCall('rtm.tasks.getList', params, token) as { tasks: Task[] };
-  return res.tasks ?? [];
+async function modelPost(action: string, fields: Record<string, string>): Promise<{ success: number; message?: string; content?: Record<string, unknown> }> {
+  const res = await fetch(`${API_BASE}/=/action/${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+    body: new URLSearchParams(fields).toString(),
+    credentials: 'same-origin',
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
-// Add a task. Pass parse=1 so the server extracts inline metadata:
-//   "Buy milk [due: friday] [tags: errands] [priority: high]"
-export async function addTask(token: string, name: string, listId = 1): Promise<Task> {
-  const res = await rtmCall(
-    'rtm.tasks.add',
-    { name, list_id: String(listId), parse: '1' },
-    token
-  ) as { task: Task };
-  return res.task;
+export async function getTasks(_token: string, _opts: { list_id?: number; modified_after?: string } = {}): Promise<Task[]> {
+  return modelGet<Task[]>('/=/search/Task/complete/0.json');
 }
 
-// Mark a task complete. Returns nothing on success, throws RtmError on failure.
-export async function completeTask(token: string, taskId: string): Promise<void> {
-  await rtmCall('rtm.tasks.complete', { task_id: taskId }, token);
+export async function addTask(_token: string, name: string, _listId = 1): Promise<Task> {
+  const res = await modelPost('BTDT.Action.CreateTask', { summary: name });
+  if (!res.success) throw new Error(res.message ?? 'Failed to create task');
+  const id = res.content?.id as string;
+  return modelGet<Task>(`/=/model/Task/id/${id}.json`);
 }
 
-export async function deleteTask(token: string, taskId: string): Promise<void> {
-  await rtmCall('rtm.tasks.delete', { task_id: taskId }, token);
+export async function completeTask(_token: string, taskId: string): Promise<void> {
+  await modelPost('BTDT.Action.UpdateTask', { id: taskId, complete: '1' });
 }
 
-export async function setTaskName(token: string, taskId: string, name: string): Promise<void> {
-  await rtmCall('rtm.tasks.setName', { task_id: taskId, name }, token);
+export async function deleteTask(_token: string, taskId: string): Promise<void> {
+  await modelPost('BTDT.Action.DeleteTask', { id: taskId });
 }
 
-export async function setTaskDueDate(token: string, taskId: string, due: string): Promise<void> {
-  // Pass empty string to clear the due date
-  await rtmCall('rtm.tasks.setDueDate', { task_id: taskId, due }, token);
+export async function setTaskName(_token: string, taskId: string, name: string): Promise<void> {
+  await modelPost('BTDT.Action.UpdateTask', { id: taskId, summary: name });
 }
 
-export async function setTaskTags(token: string, taskId: string, tags: string): Promise<void> {
-  await rtmCall('rtm.tasks.setTags', { task_id: taskId, tags }, token);
+export async function setTaskDueDate(_token: string, taskId: string, due: string): Promise<void> {
+  await modelPost('BTDT.Action.UpdateTask', { id: taskId, due });
+}
+
+export async function setTaskTags(_token: string, taskId: string, tags: string): Promise<void> {
+  await modelPost('BTDT.Action.UpdateTask', { id: taskId, tags });
 }

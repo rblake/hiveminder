@@ -42,7 +42,7 @@ describe('rtmCall', () => {
         HttpResponse.json({ stat: 'fail', code: 112, message: 'Method not found' })
       )
     );
-    const err = await rtmCall('rtm.bad.method', {}, TOKEN).catch(e => e);
+    const err = await rtmCall('rtm.bad.method', {}, TOKEN).catch(e => e) as RtmError;
     expect(err).toBeInstanceOf(RtmError);
     expect(err.code).toBe(112);
     expect(err.message).toContain('Method not found');
