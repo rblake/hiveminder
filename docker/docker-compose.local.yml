@@ -1,0 +1,11 @@
+# Local development override — use with:
+#   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml up
+#
+# Differences from production:
+#   - HM_BASE_URL points to localhost (no TLS, no tasks.rblake.net)
+#   - App and PWA reachable at http://localhost:8888 and http://localhost:8888/app/
+
+services:
+  app:
+    environment:
+      HM_BASE_URL: "http://localhost:8888"

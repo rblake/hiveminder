@@ -1,0 +1,84 @@
+# Hiveminder local configuration
+# This file is placed at etc/config.yml and overrides the framework defaults.
+# Environment variables (set in docker-compose.yml) are interpolated at startup
+# by the entrypoint script which rewrites this file before launching Jifty.
+
+application:
+  name: Hiveminder
+  # URL where the app is reachable — must match what you expose in docker-compose
+  base_url: "__HM_BASE_URL__"
+  # Disable all outbound email for local use (tasks won't send notifications)
+  fileresources:
+    - share
+    - html
+  # BTDT feature flags (accessed via Jifty->config->app('FeatureFlags'))
+  FeatureFlags:
+    IMAP: 0
+    TimeTracking: 1
+  # EULA version — must be set or BTDT->current_eula_version returns undef,
+  # causing an uninitialized-value warning on every authenticated page load.
+  # New users default to accepted_eula_version=0, so 0>=0 passes cleanly.
+  EULAVersion: 0
+
+framework:
+  AdminMode: 0
+  DevelMode: 0
+  # The Perl class name for the application (from Makefile.PL: name('BTDT'))
+  ApplicationClass: BTDT
+  # Force localhost binding — Jifty's server will bind to this port
+  Web:
+    port: 8888
+    # Bind only to loopback so the container port mapping controls access
+    host: "0.0.0.0"
+    # Use Standalone (HTTP::Server::Simple based) server
+    handler: Standalone
+
+  Database:
+    Database: "__HM_DB_NAME__"
+    Driver: Pg
+    Host: "__HM_DB_HOST__"
+    Port: __HM_DB_PORT__
+    User: "__HM_DB_USER__"
+    Password: "__HM_DB_PASS__"
+    # Schema version — must be >= the highest 'since' version across all BTDT
+    # models so that all columns are included during jifty schema --setup.
+    # BTDT::Upgrade only goes to 0.2.97 but model columns reach 0.3.1
+    # (Group.never_email). Setting 0.3.1 includes all columns.
+    Version: 0.3.1
+
+  # Plugins: short names — Jifty prepends Jifty::Plugin:: automatically
+  # SinglePage omitted: converts links to SPA.historyChange/__page region, but
+  #   __page only exists for Template::Declare views; Hiveminder uses Mason so
+  #   clicks just update the URL hash without loading new content. Full-page
+  #   navigation works correctly without it.
+  # Chart: task statistics charts
+  # OAuth: API access
+  # AccessLog: HTTP access logging
+  # Monitoring/Quota: not on CPAN (Best Practical internal) — omitted
+  Plugins:
+    - Chart: {}
+    - OAuth: {}
+    - AccessLog: {}
+
+  # Email: use a local no-op sender for local installs
+  Mail:
+    Sender: Sendmail
+    Sendmail: /bin/true
+
+  # Logging
+  LogLevel: INFO
+  LogDir: /opt/hiveminder/log
+
+  # Disable features that require external services
+  Features:
+    PaidAccounts: 0
+    IM: 0
+    IMAP: 0
+    SMS: 0
+    Memcached: 0
+
+# Admin account created on first run by entrypoint.sh
+admin:
+  email: "__HM_ADMIN_EMAIL__"
+  password: "__HM_ADMIN_PASS__"
+  name: "Local Admin"

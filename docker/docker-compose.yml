@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:9.6-alpine
+    # Postgres 9.6 is the last version with no-password auth style
+    # that Jifty's DBD::Pg 3.2.1 handles cleanly
+    environment:
+      POSTGRES_USER: hiveminder
+      POSTGRES_PASSWORD: hiveminder
+      POSTGRES_DB: hiveminder
+    volumes:
+      - hm_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hiveminder"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # These override values in etc/config.yml at runtime
+      HM_DB_HOST: db
+      HM_DB_PORT: 5432
+      HM_DB_NAME: hiveminder
+      HM_DB_USER: hiveminder
+      HM_DB_PASS: hiveminder
+      HM_BASE_URL: "https://hiveminder.com"
+      HM_ADMIN_EMAIL: "admin@hiveminder.com"
+      HM_ADMIN_PASS: "hiveminder"
+    ports:
+      # Only bind to localhost — not 0.0.0.0 — for local-only access
+      - "127.0.0.1:8888:8888"
+    volumes:
+      - hm_app_data:/opt/hiveminder/var
+    restart: unless-stopped
+
+volumes:
+  hm_pgdata:
+  hm_app_data:
