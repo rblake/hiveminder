@@ -24,8 +24,15 @@ async function modelPost(action: string, fields: Record<string, string>): Promis
   return res.json();
 }
 
-export async function getTasks(_token: string, _opts: { list_id?: number; modified_after?: string } = {}): Promise<Task[]> {
-  return modelGet<Task[]>('/=/search/Task/complete/0.json');
+export async function getTasks(_token: string, opts: { list_id?: number; modified_after?: string } = {}): Promise<Task[]> {
+  const all = await modelGet<Task[]>('/=/search/Task/complete/0.json');
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  if (opts.list_id === 2) {
+    // Later: tasks with a starts date in the future
+    return all.filter(t => t.starts != null && t.starts > today);
+  }
+  // Todo (default): tasks with no starts date, or starts today or earlier
+  return all.filter(t => t.starts == null || t.starts <= today);
 }
 
 export async function addTask(_token: string, name: string, _listId = 1): Promise<Task> {
