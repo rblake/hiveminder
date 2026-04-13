@@ -93,7 +93,9 @@ if ($search_open or ($search_open_when_empty
 }
 
 my $region = Jifty::Web::PageRegion->new(
-    name => Jifty->web->current_region->name . "otherstuff",
+    name => (Jifty->web->current_region
+                ? Jifty->web->current_region->name
+                : 'tasklist') . "otherstuff",
     path => $fragment_path
 );
 
