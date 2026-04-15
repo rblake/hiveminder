@@ -57,7 +57,6 @@ export function App() {
       {view === 'add' && (
         <AddTask
           token={auth.token}
-          onSubmit={() => setView('tasks')}
           onCancel={() => setView('tasks')}
         />
       )}

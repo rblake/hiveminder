@@ -70,31 +70,19 @@
   animation: fade 0.3s ease-in;
 }
 
+.error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 0.875rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
 @keyframes fade {
   from { opacity: 0; }
   to   { opacity: 1; }
-}
-
-.chips {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.chip {
-  padding: 6px 12px;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  font-size: 0.8125rem;
-  color: #374151;
-  cursor: pointer;
-  font-family: monospace;
-  transition: background 0.1s;
-}
-
-.chip:active {
-  background: #e5e7eb;
 }
 
 .actions {
@@ -102,8 +90,6 @@
   align-items: center;
   justify-content: center;
   gap: 24px;
-  margin-top: auto;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .submit {
@@ -125,4 +111,9 @@
 .submit:disabled {
   background: #93c5fd;
   cursor: not-allowed;
+}
+
+.addedList {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 8px;
 }

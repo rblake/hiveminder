@@ -26,48 +26,33 @@ beforeEach(() => {
 
 describe('AddTask', () => {
   it('renders a text input and submit button', () => {
-    render(<AddTask token={TOKEN} onSubmit={vi.fn()} onCancel={vi.fn()} />, { wrapper });
+    render(<AddTask token={TOKEN} onCancel={vi.fn()} />, { wrapper });
     expect(screen.getByRole('textbox')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add task/i })).toBeInTheDocument();
   });
 
   it('renders the mic button', () => {
-    render(<AddTask token={TOKEN} onSubmit={vi.fn()} onCancel={vi.fn()} />, { wrapper });
+    render(<AddTask token={TOKEN} onCancel={vi.fn()} />, { wrapper });
     expect(screen.getByRole('button', { name: /voice/i })).toBeInTheDocument();
   });
 
   it('submit button is disabled when the text field is empty', () => {
-    render(<AddTask token={TOKEN} onSubmit={vi.fn()} onCancel={vi.fn()} />, { wrapper });
+    render(<AddTask token={TOKEN} onCancel={vi.fn()} />, { wrapper });
     expect(screen.getByRole('button', { name: /add task/i })).toBeDisabled();
   });
 
-  it('calls onSubmit and clears the field after a successful submit', async () => {
-    const onSubmit = vi.fn();
-    render(<AddTask token={TOKEN} onSubmit={onSubmit} onCancel={vi.fn()} />, { wrapper });
+  it('clears the field after a successful submit', async () => {
+    render(<AddTask token={TOKEN} onCancel={vi.fn()} />, { wrapper });
 
     await userEvent.type(screen.getByRole('textbox'), 'Buy coffee');
     fireEvent.click(screen.getByRole('button', { name: /add task/i }));
 
-    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
-    expect(screen.getByRole('textbox')).toHaveValue('');
-  });
-
-  it('renders quick-insert chips for common due dates', () => {
-    render(<AddTask token={TOKEN} onSubmit={vi.fn()} onCancel={vi.fn()} />, { wrapper });
-    expect(screen.getByText('[due: today]')).toBeInTheDocument();
-    expect(screen.getByText('[due: tomorrow]')).toBeInTheDocument();
-  });
-
-  it('appends chip text to the input when a chip is clicked', async () => {
-    render(<AddTask token={TOKEN} onSubmit={vi.fn()} onCancel={vi.fn()} />, { wrapper });
-    await userEvent.type(screen.getByRole('textbox'), 'Buy milk');
-    fireEvent.click(screen.getByText('[due: today]'));
-    expect(screen.getByRole('textbox')).toHaveValue('Buy milk [due: today]');
+    await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue(''));
   });
 
   it('calls onCancel when the cancel button is pressed', () => {
     const onCancel = vi.fn();
-    render(<AddTask token={TOKEN} onSubmit={onCancel} onCancel={onCancel} />, { wrapper });
+    render(<AddTask token={TOKEN} onCancel={onCancel} />, { wrapper });
     fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onCancel).toHaveBeenCalled();
   });

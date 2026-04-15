@@ -48,6 +48,33 @@
   flex-shrink: 0;
 }
 
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px 10px 48px;
+}
+
+.tag {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.hiddenUntil {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.link {
+  color: #2563eb;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
 .description {
   margin: 0;
   padding: 0 16px 12px 48px;

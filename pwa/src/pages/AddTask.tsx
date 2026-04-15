@@ -1,26 +1,22 @@
 import { useState } from 'react';
-import { useAddTask } from '@/hooks/useTasks';
+import { useAddTask, useCompleteTask } from '@/hooks/useTasks';
 import { useVoice } from '@/hooks/useVoice';
 import { MicButton } from '@/components/MicButton';
+import { TaskRow } from '@/components/TaskRow';
 import { parseVoiceInput } from '@/api/voice';
+import type { Task } from '@/types';
 import styles from './AddTask.module.css';
 
 interface Props {
   token: string;
-  onSubmit: () => void;
   onCancel: () => void;
 }
 
-const CHIPS = [
-  '[due: today]',
-  '[due: tomorrow]',
-  '[priority: high]',
-  '[tags: errands]',
-] as const;
-
-export function AddTask({ token, onSubmit, onCancel }: Props) {
+export function AddTask({ token, onCancel }: Props) {
   const [text, setText] = useState('');
-  const { mutate: addTask, isPending } = useAddTask(token);
+  const [addedTasks, setAddedTasks] = useState<Task[]>([]);
+  const { mutate: addTask, isPending, isError } = useAddTask(token);
+  const { mutate: completeTask } = useCompleteTask(token, 1);
   const { isListening, startListening, stopListening, supported, transcript } = useVoice();
 
   // When speech recognition produces a transcript, populate the text field.
@@ -30,18 +26,19 @@ export function AddTask({ token, onSubmit, onCancel }: Props) {
     setText(transcript);
   }
 
-  const appendChip = (chip: string) => {
-    setText(t => t ? `${t} ${chip}` : chip);
-  };
-
   const handleSubmit = () => {
     if (!text.trim()) return;
     addTask(parseVoiceInput(text.trim()), {
-      onSuccess: () => {
+      onSuccess: (newTask) => {
         setText('');
-        onSubmit();
+        setAddedTasks(prev => [...prev, newTask]);
       },
     });
+  };
+
+  const handleComplete = (id: string) => {
+    completeTask(id);
+    setAddedTasks(prev => prev.filter(t => t.id !== id));
   };
 
   return (
@@ -55,32 +52,6 @@ export function AddTask({ token, onSubmit, onCancel }: Props) {
       </header>
 
       <main className={styles.main}>
-        <textarea
-          className={styles.input}
-          value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder={
-            supported
-              ? 'Type or tap the mic to speak…'
-              : 'Type your task here…'
-          }
-          rows={4}
-          autoFocus
-          aria-label="Task text"
-        />
-
-        {isListening && (
-          <p className={styles.hint}>Listening… speak your task</p>
-        )}
-
-        <div className={styles.chips}>
-          {CHIPS.map(chip => (
-            <button key={chip} className={styles.chip} onClick={() => appendChip(chip)}>
-              {chip}
-            </button>
-          ))}
-        </div>
-
         <div className={styles.actions}>
           {supported && (
             <MicButton
@@ -99,6 +70,36 @@ export function AddTask({ token, onSubmit, onCancel }: Props) {
             {isPending ? 'Adding…' : 'Add Task'}
           </button>
         </div>
+
+        {isError && (
+          <p className={styles.error}>Couldn't save — check your connection and try again.</p>
+        )}
+
+        <textarea
+          className={styles.input}
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder={
+            supported
+              ? 'Type or tap the mic to speak…'
+              : 'Type your task here…'
+          }
+          rows={4}
+          autoFocus
+          aria-label="Task text"
+        />
+
+        {isListening && (
+          <p className={styles.hint}>Listening… speak your task</p>
+        )}
+
+        {addedTasks.length > 0 && (
+          <div className={styles.addedList}>
+            {addedTasks.map(task => (
+              <TaskRow key={task.id} task={task} onComplete={handleComplete} />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

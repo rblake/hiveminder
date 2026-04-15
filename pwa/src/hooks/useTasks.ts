@@ -51,7 +51,7 @@ export function useAddTask(token: string) {
   return useMutation({
     mutationFn: (name: string) => addTask(token, name),
     onSuccess: () => {
-      // Invalidate all task list caches so both To Do and Later refresh.
+      // Invalidate both lists so they re-fetch from the server when navigating back.
       qc.invalidateQueries({ queryKey: ['tasks', token] });
     },
   });
