@@ -25,7 +25,7 @@ async function modelPost(action: string, fields: Record<string, string>): Promis
 }
 
 export async function getTasks(_token: string, opts: { list_id?: number; modified_after?: string } = {}): Promise<Task[]> {
-  const all = await modelGet<Task[]>('/=/search/Task/complete/0.json');
+  const all = await modelGet<Task[]>('/=/search/Task/complete/0/__per_page/500.json');
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   if (opts.list_id === 2) {
     // Later: tasks with a starts date in the future
