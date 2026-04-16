@@ -36,10 +36,26 @@ export async function getTasks(_token: string, opts: { list_id?: number; modifie
 }
 
 export async function addTask(_token: string, name: string, _listId = 1): Promise<Task> {
-  const res = await modelPost('BTDT.Action.CreateTask', { summary: name });
-  if (!res.success) throw new Error(res.message ?? 'Failed to create task');
-  const id = res.content?.id as string;
-  return modelGet<Task>(`/=/model/Task/id/${id}.json`);
+  const res = await fetch(`${API_BASE}/=/action/BTDT.Action.CreateTask`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+    body: new URLSearchParams({ summary: name }).toString(),
+    credentials: 'same-origin',
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+  if (res.redirected) {
+    // Jifty responds with a 302 to the created task's JSON URL; fetch follows it
+    // automatically and the response body is already the full Task object.
+    return res.json() as Promise<Task>;
+  }
+
+  // Non-redirect fallback: parse the action result and fetch the task separately.
+  const action = await res.json() as { success: number; message?: string; content?: { record_locator?: string } };
+  if (!action.success) throw new Error(action.message ?? 'Failed to create task');
+  const rl = action.content?.record_locator;
+  if (!rl) throw new Error('No record locator in response');
+  return modelGet<Task>(`/=/model/Task/id/${rl}.json`);
 }
 
 export async function completeTask(_token: string, taskId: string): Promise<void> {
