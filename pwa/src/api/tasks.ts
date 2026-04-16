@@ -35,11 +35,13 @@ export async function getTasks(_token: string, opts: { list_id?: number; modifie
   return all.filter(t => t.starts == null || t.starts <= today);
 }
 
-export async function addTask(_token: string, name: string, _listId = 1): Promise<Task> {
+export async function addTask(_token: string, name: string, ownerEmail?: string, _listId = 1): Promise<Task> {
+  const fields: Record<string, string> = { summary: name };
+  if (ownerEmail) fields.owner_id = ownerEmail;
   const res = await fetch(`${API_BASE}/=/action/BTDT.Action.CreateTask`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
-    body: new URLSearchParams({ summary: name }).toString(),
+    body: new URLSearchParams(fields).toString(),
     credentials: 'same-origin',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);

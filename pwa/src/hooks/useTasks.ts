@@ -45,11 +45,11 @@ export function useCompleteTask(token: string, listId: number) {
   });
 }
 
-export function useAddTask(token: string) {
+export function useAddTask(token: string, ownerEmail?: string) {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (name: string) => addTask(token, name),
+    mutationFn: (name: string) => addTask(token, name, ownerEmail),
     onSuccess: () => {
       // Invalidate both lists so they re-fetch from the server when navigating back.
       qc.invalidateQueries({ queryKey: ['tasks', token] });

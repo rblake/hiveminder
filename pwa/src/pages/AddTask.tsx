@@ -9,13 +9,14 @@ import styles from './AddTask.module.css';
 
 interface Props {
   token: string;
+  ownerEmail: string;
   onCancel: () => void;
 }
 
-export function AddTask({ token, onCancel }: Props) {
+export function AddTask({ token, ownerEmail, onCancel }: Props) {
   const [text, setText] = useState('');
   const [addedTasks, setAddedTasks] = useState<Task[]>([]);
-  const { mutate: addTask, isPending, isError } = useAddTask(token);
+  const { mutate: addTask, isPending, isError } = useAddTask(token, ownerEmail);
   const { mutate: completeTask } = useCompleteTask(token, 1);
   const { isListening, startListening, stopListening, supported, transcript } = useVoice();
 

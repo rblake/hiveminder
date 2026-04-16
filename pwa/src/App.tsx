@@ -57,6 +57,7 @@ export function App() {
       {view === 'add' && (
         <AddTask
           token={auth.token}
+          ownerEmail={auth.user.username}
           onCancel={() => setView('tasks')}
         />
       )}
