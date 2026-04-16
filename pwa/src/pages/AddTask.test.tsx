@@ -13,6 +13,13 @@ function wrapper({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 }
 
+function renderAddTask(onCancel = vi.fn()) {
+  return render(
+    <AddTask token={TOKEN} ownerEmail={FIXTURES.user.username} onCancel={onCancel} />,
+    { wrapper }
+  );
+}
+
 // Stub SpeechRecognition for all tests in this file
 beforeEach(() => {
   const MockSR = vi.fn(() => ({
@@ -26,23 +33,23 @@ beforeEach(() => {
 
 describe('AddTask', () => {
   it('renders a text input and submit button', () => {
-    render(<AddTask token={TOKEN} onCancel={vi.fn()} />, { wrapper });
+    renderAddTask();
     expect(screen.getByRole('textbox')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add task/i })).toBeInTheDocument();
   });
 
   it('renders the mic button', () => {
-    render(<AddTask token={TOKEN} onCancel={vi.fn()} />, { wrapper });
+    renderAddTask();
     expect(screen.getByRole('button', { name: /voice/i })).toBeInTheDocument();
   });
 
   it('submit button is disabled when the text field is empty', () => {
-    render(<AddTask token={TOKEN} onCancel={vi.fn()} />, { wrapper });
+    renderAddTask();
     expect(screen.getByRole('button', { name: /add task/i })).toBeDisabled();
   });
 
   it('clears the field after a successful submit', async () => {
-    render(<AddTask token={TOKEN} onCancel={vi.fn()} />, { wrapper });
+    renderAddTask();
 
     await userEvent.type(screen.getByRole('textbox'), 'Buy coffee');
     fireEvent.click(screen.getByRole('button', { name: /add task/i }));
@@ -52,7 +59,7 @@ describe('AddTask', () => {
 
   it('calls onCancel when the cancel button is pressed', () => {
     const onCancel = vi.fn();
-    render(<AddTask token={TOKEN} onCancel={onCancel} />, { wrapper });
+    renderAddTask(onCancel);
     fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onCancel).toHaveBeenCalled();
   });
