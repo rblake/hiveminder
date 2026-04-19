@@ -294,6 +294,8 @@ sub create {
         $args{'created_on'} = DateTime->now();
     }
 
+    $args{pro_account} = 1 if $ENV{HM_LOCAL_MODE};
+
     my (@ret) = $self->SUPER::create(%args);
     $self->__set(column => 'primary_account', value => $self->id);
     $self->regenerate_auth_token;
