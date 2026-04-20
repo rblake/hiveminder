@@ -13,15 +13,18 @@ export interface VoiceState {
   startListening: () => void;
   stopListening: () => void;
   supported: boolean;
+  error: string | null;
 }
 
 export function useVoice(): VoiceState {
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const recRef = useRef<SpeechRecognition | null>(null);
 
   const startListening = () => {
     if (!SR) return;
+    setError(null);
 
     const rec = new SR();
     rec.lang = 'en-US';
@@ -36,7 +39,14 @@ export function useVoice(): VoiceState {
     };
 
     rec.onend = () => setIsListening(false);
-    rec.onerror = () => setIsListening(false);
+    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
+      setIsListening(false);
+      if (e.error === 'not-allowed') {
+        setError('Microphone access was denied. Check your browser and iOS Settings → Privacy → Microphone.');
+      } else {
+        setError(`Microphone error: ${e.error}`);
+      }
+    };
 
     recRef.current = rec;
     setIsListening(true);
@@ -55,5 +65,6 @@ export function useVoice(): VoiceState {
     startListening,
     stopListening,
     supported: !!SR,
+    error,
   };
 }

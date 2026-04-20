@@ -18,7 +18,7 @@ export function AddTask({ token, ownerEmail, onCancel }: Props) {
   const [addedTasks, setAddedTasks] = useState<Task[]>([]);
   const { mutate: addTask, isPending, isError } = useAddTask(token, ownerEmail);
   const { mutate: completeTask } = useCompleteTask(token, 1);
-  const { isListening, startListening, stopListening, supported, transcript } = useVoice();
+  const { isListening, startListening, stopListening, supported, transcript, error: voiceError } = useVoice();
 
   // When speech recognition produces a transcript, populate the text field.
   // We use a ref-based approach: transcript from useVoice is the live value;
@@ -92,6 +92,10 @@ export function AddTask({ token, ownerEmail, onCancel }: Props) {
 
         {isListening && (
           <p className={styles.hint}>Listening… speak your task</p>
+        )}
+
+        {voiceError && (
+          <p className={styles.error}>{voiceError}</p>
         )}
 
         {addedTasks.length > 0 && (
