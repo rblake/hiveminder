@@ -39,7 +39,7 @@ export function useVoice(): VoiceState {
     };
 
     rec.onend = () => setIsListening(false);
-    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
+    (rec as unknown as { onerror: (e: SpeechRecognitionErrorEvent) => void }).onerror = (e) => {
       setIsListening(false);
       if (e.error === 'not-allowed') {
         setError('Microphone access was denied. Check your browser and iOS Settings → Privacy → Microphone.');
